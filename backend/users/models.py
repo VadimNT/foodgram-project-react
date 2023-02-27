@@ -75,7 +75,7 @@ class Follow(models.Model):
         return f'{self.user.username} -> {self.author.username}'
 
 
-class Carts(models.Model):
+class Cart(models.Model):
     """Рецепты в корзине покупок.
     Модель связывает Recipe и  User.
     Attributes:
