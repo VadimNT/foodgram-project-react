@@ -7,37 +7,6 @@ from backend.recipes.models import Recipe
 User = get_user_model()
 
 
-class Favorite(models.Model):
-    """Избранные рецепты.
-    Модель связывает Recipe и  User.
-    Attributes:
-        recipe(int):
-            Связаный рецепт. Связь через ForeignKey.
-        user(int):
-            Связаный пользователь. Связь через ForeignKey.
-        date_added(datetime):
-    """
-    recipe = models.ForeignKey(
-        verbose_name='Рецепт',
-        related_name='recipes',
-        to=Recipe,
-        on_delete=CASCADE,
-    )
-    user = models.ForeignKey(
-        verbose_name='Пользователь',
-        related_name='users',
-        to=User,
-        on_delete=CASCADE,
-    )
-
-    class Meta:
-        verbose_name = 'Избранный рецепт пользователя',
-        verbose_name_plural = 'Избранные рецепты пользователя'
-
-    def __str__(self) -> str:
-        return f'{self.user} -> {self.recipe}'
-
-
 class Follow(models.Model):
     """Подписки пользователей друг на друга.
     Attributes:

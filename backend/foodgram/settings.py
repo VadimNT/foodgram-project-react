@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "users.apps.ApiConfig",
     "recipes.apps.ApiConfig",
+    "rest_framework",
 ]
 
 MIDDLEWARE = [
