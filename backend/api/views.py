@@ -1,9 +1,10 @@
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
-from backend.api.permissions import IsAdminOrReadOnly
-from backend.api.serializers import TagSerializer
-from backend.recipes.models import Tag
+from backend.api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from backend.api.serializers import TagSerializer, IngredientSerializer, \
+    UserSerializer
+from backend.recipes.models import Tag, Ingredient
 
 
 # Create your views here.
@@ -18,11 +19,13 @@ class TagViewSet(ModelViewSet):
 
 
 class UserViewSet(ModelViewSet):
-    pass
+    serializer_class = UserSerializer
 
 
 class IngredientViewSet(ModelViewSet):
-    pass
+    serializer_class = IngredientSerializer
+    permission_classes = (IsAuthorOrReadOnly,)
+    queryset = Ingredient.objects.all()
 
 
 class RecipeViewSet(ModelViewSet):

@@ -203,13 +203,13 @@ class Favorite(models.Model):
     """
     recipe = models.ForeignKey(
         verbose_name='Рецепт',
-        related_name='recipes',
+        related_name='favorited',
         to=Recipe,
         on_delete=CASCADE,
     )
     user = models.ForeignKey(
         verbose_name='Пользователь',
-        related_name='users',
+        related_name='favorited',
         to=User,
         on_delete=CASCADE,
     )

@@ -14,7 +14,6 @@ class Follow(models.Model):
         Автор рецепта. Связь через ForeignKey.
     user(int):
         Подписчик Связь через ForeignKey.
-    date_added(datetime):
     """
     user = models.ForeignKey(
         User,
@@ -52,18 +51,16 @@ class Cart(models.Model):
             Связаный рецепт. Связь через ForeignKey.
         user(int):
             Связаный пользователь. Связь через ForeignKey.
-        date_added(datetime):
-            Дата добавления рецепта в корзину.
     """
     user = models.ForeignKey(
         verbose_name='Пользователь',
-        related_name='users',
+        related_name='carts',
         to=User,
         on_delete=CASCADE,
     )
     recipe = models.ManyToManyField(
         verbose_name='Рецепт',
-        related_name='recipe',
+        related_name='carts',
         to=Recipe,
         on_delete=SET_NULL,
     )
