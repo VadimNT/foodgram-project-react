@@ -28,6 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Application definition
+DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
 
 INSTALLED_APPS = [
     "django.contrib.admin",
