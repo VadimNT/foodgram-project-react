@@ -22,10 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('TOKEN', 'default-value')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', default='*')]
 
 # Application definition
 DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
@@ -37,10 +36,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "users.apps.UsersConfig",
+    "recipes.apps.RecipesConfig",
     "api.apps.ApiConfig",
-    "users.apps.ApiConfig",
-    "recipes.apps.ApiConfig",
     "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -91,6 +93,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
+#AUTH_USER_MODEL = "users.CustomUser"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -129,17 +132,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PAGINATION_CLASS': [
-        'rest_framework.pagination.PageNumberPagination',
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
     ],
-    'PAGE_SIZE': 10
 }
 
 SIMPLE_JWT = {

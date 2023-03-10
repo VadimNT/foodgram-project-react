@@ -10,16 +10,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from backend.api.filters import IngredientFilter
-from backend.api.pagination import CustomPagination
-from backend.api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from backend.api.serializers import (TagSerializer, IngredientSerializer,
+from api.filters import IngredientFilter
+from api.pagination import CustomPagination
+from api.permissions import (IsAdminOrReadOnly,
+                                     IsAuthorOrAdminOrReadOnly)
+from api.serializers import (TagSerializer, IngredientSerializer,
                                      UserSerializer, SubscribeSerializer,
                                      RecipeSerializer, CartSerializer,
                                      FavoriteSerializer)
-from backend.foodgram.settings import DATE_TIME_FORMAT
-from backend.recipes.models import Tag, Ingredient, Recipe, Favorite
-from backend.users.models import User, Follow, Cart
+from recipes.models import Tag, Ingredient, Recipe, Favorite
+from users.models import CustomUser, Follow, Cart
 
 
 # Create your views here.
@@ -41,7 +41,7 @@ class UserViewSet(ModelViewSet):
        возможность подписаться на автора рецепта.
     """
     serializer_class = UserSerializer
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     pagination_class = CustomPagination
 
     @action(
@@ -51,7 +51,7 @@ class UserViewSet(ModelViewSet):
     )
     def subscribe(self, request, id):
         user = request.user
-        author = get_object_or_404(User, pk=id)
+        author = get_object_or_404(CustomUser, pk=id)
 
         if request.method == 'POST':
             serializer = SubscribeSerializer(
@@ -66,12 +66,12 @@ class UserViewSet(ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        datail=False,
+        detail=False,
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
         user = request.user
-        queryset = User.objects.filter(following__user=user)
+        queryset = CustomUser.objects.filter(following__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(pages, many=True,
                                          context={'request': request})
@@ -84,7 +84,7 @@ from recipes.models import Ingredient, Recipe, Tag
         Вывод ингридиентов.
     """
     serializer_class = IngredientSerializer
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrReadOnly,)
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
@@ -96,7 +96,7 @@ class RecipeViewSet(ModelViewSet):
     """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = (IsAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
 
@@ -174,7 +174,7 @@ class RecipeViewSet(ModelViewSet):
 
 
 class UserViewSet(UserViewSet):
-    queryset = User.objects.all()
+    queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     pagination_class = CustomPagination
 
@@ -185,7 +185,7 @@ class UserViewSet(UserViewSet):
     )
     def subscribe(self, request, id):
         user = request.user
-        author = get_object_or_404(User, pk=id)
+        author = get_object_or_404(CustomUser, pk=id)
 
         if request.method == 'POST':
             serializer = SubscribeSerializer(
@@ -204,7 +204,7 @@ class UserViewSet(UserViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         user = request.user
-        queryset = User.objects.filter(following__user=user)
+        queryset = CustomUser.objects.filter(following__user=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(
             pages, many=True, context={'request': request}

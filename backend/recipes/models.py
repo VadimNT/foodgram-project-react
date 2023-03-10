@@ -12,10 +12,11 @@ Models:
         Модель для связи Ingredient и Recipe.
         Также указывает количество ингридиента.
 """
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import SET_NULL, CASCADE
 
-from backend.users.models import User
+User = get_user_model()
 
 
 class Tag(models.Model):

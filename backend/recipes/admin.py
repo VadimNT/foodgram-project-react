@@ -1,6 +1,6 @@
 from django.contrib.admin import site, ModelAdmin, register
 
-from backend.recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, Favorite
 
 site.site_header = 'Администрирование сайта Foodgram'
 
@@ -22,7 +22,15 @@ class IngredientAdmin(ModelAdmin):
 class RecipeAdmin(ModelAdmin):
     list_display = ('tags', 'author', 'name', 'image', 'text', 'cooking_time',)
     list_filter = ('name', 'author__username', 'tags__name',)
-    search_fields = ('tags', 'author', 'name', 'image', 'text', 'cooking_time',)
+    search_fields = (
+        'tags', 'author', 'name', 'image', 'text', 'cooking_time',
+    )
     empty_value_display = '-пусто-'
     # TODO На странице рецепта вывести общее число добавлений этого рецепта
     #  в избранное.
+
+
+@register(Favorite)
+class FavoriteAdmin(ModelAdmin):
+    list_display = ('user', 'recipe',)
+    search_fields = ('user__username', 'recipe__name',)

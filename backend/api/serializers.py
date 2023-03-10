@@ -2,8 +2,8 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator
 
-from backend.recipes.models import Tag, Ingredient, Recipe
-from backend.users.models import User, Follow
+from recipes.models import Tag, Ingredient, Recipe
+from users.models import CustomUser, Follow
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,18 +11,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     username = serializers.CharField(
         validators=[
-            UniqueValidator(queryset=User.objects.all())
+            UniqueValidator(queryset=CustomUser.objects.all())
         ],
         required=True,
     )
     email = serializers.EmailField(
         validators=[
-            UniqueValidator(queryset=User.objects.all())
+            UniqueValidator(queryset=CustomUser.objects.all())
         ]
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'id',
             'email',
@@ -34,6 +34,11 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
+        """
+        Првоеряем подписку на пользователя
+        :param obj: пользователь, который подписан
+        :return: вернет True or False, если подписан
+        """
         user = self.context.get('request').user
         if user.is_aninymous:
             return False
@@ -46,7 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
             Returns:
                 User: Созданный пользователь.
         """
-        user = User(
+        user = CustomUser(
             email=validated_data['email'],
             username=validated_data['username'],
             first_name=validated_data['first_name'],
@@ -75,7 +80,7 @@ class SubscribeSerializer(UserSerializer):
     recipes_count = SerializerMethodField()
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = (
             'id',
             'email',

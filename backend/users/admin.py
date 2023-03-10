@@ -1,11 +1,11 @@
 from django.contrib.admin import ModelAdmin, register, site
 
-from backend.users.models import Cart, Favorite, Follow, User
+from users.models import Cart, Follow, CustomUser
 
 site.site_header = 'Администрирование сайта Foodgram'
 
 
-@register(User)
+@register(CustomUser)
 class UserAdmin(ModelAdmin):
     list_display = ('username', 'email',)
     list_filter = ('username', 'email',)
@@ -14,12 +14,6 @@ class UserAdmin(ModelAdmin):
 
 @register(Cart)
 class CartAdmin(ModelAdmin):
-    list_display = ('user', 'recipe',)
-    search_fields = ('user__username', 'recipe__name',)
-
-
-@register(Favorite)
-class FavoriteAdmin(ModelAdmin):
     list_display = ('user', 'recipe',)
     search_fields = ('user__username', 'recipe__name',)
 
