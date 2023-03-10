@@ -18,8 +18,8 @@ from api.serializers import (TagSerializer, IngredientSerializer,
                                      UserSerializer, SubscribeSerializer,
                                      RecipeSerializer, CartSerializer,
                                      FavoriteSerializer)
-from recipes.models import Tag, Ingredient, Recipe, Favorite
-from users.models import CustomUser, Follow, Cart
+from recipes.models import Tag, Ingredient, Recipe, Favorite, Cart
+from users.models import CustomUser, Follow
 
 
 # Create your views here.

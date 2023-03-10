@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register, site
 
-from users.models import Cart, Follow, CustomUser
+from users.models import Follow, CustomUser
 
 site.site_header = 'Администрирование сайта Foodgram'
 
@@ -10,12 +10,6 @@ class UserAdmin(ModelAdmin):
     list_display = ('username', 'email',)
     list_filter = ('username', 'email',)
     search_fields = ('username', 'email',)
-
-
-@register(Cart)
-class CartAdmin(ModelAdmin):
-    list_display = ('user', 'recipe',)
-    search_fields = ('user__username', 'recipe__name',)
 
 
 @register(Follow)

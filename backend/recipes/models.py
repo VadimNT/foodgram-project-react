@@ -13,6 +13,7 @@ Models:
         Также указывает количество ингридиента.
 """
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import SET_NULL, CASCADE
 
@@ -78,7 +79,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
+        verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингридиенты'
         ordering = ('name',)
 
@@ -126,9 +127,10 @@ class Recipe(models.Model):
         null=True,
     )
     ingredients = models.ManyToManyField(
+        to=Ingredient,
         verbose_name='Ингридиенты',
         related_name='recipes',
-        to=Ingredient,
+        through='recipes.IngredientRecipe',
     )
     name = models.CharField(
         verbose_name='Название',
@@ -155,7 +157,7 @@ class Recipe(models.Model):
         return f'{self.name}. Автор: {self.author.username}'
 
 
-class AmountIngredient(models.Model):
+class IngredientRecipe(models.Model):
     """Количество ингридиентов в блюде.
     Модель связывает Recipe и Ingredient с указанием количества ингридиента.
     Attributes:
@@ -168,25 +170,26 @@ class AmountIngredient(models.Model):
             по минимальному и максимальному значениям.
     """
     recipe = models.ForeignKey(
+        Recipe,
         verbose_name='В каких рецептах',
         related_name='ingredient',
-        to=Recipe,
         on_delete=CASCADE,
     )
     ingredients = models.ForeignKey(
+        Ingredient,
         verbose_name='Связанные ингредиенты',
         related_name='recipe',
-        to=Ingredient,
         on_delete=CASCADE,
     )
     amount = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)],
         verbose_name='Количество',
-        default=0,
+        default=1,
     )
 
     class Meta:
         verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Количество ингридиентов'
+        verbose_name_plural = 'Ингредиенты рецепта'
 
     def __str__(self) -> str:
         return f'{self.amount} {self.ingredients}'
@@ -218,6 +221,36 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт пользователя',
         verbose_name_plural = 'Избранные рецепты пользователя'
+
+    def __str__(self) -> str:
+        return f'{self.user} -> {self.recipe}'
+
+
+class Cart(models.Model):
+    """Рецепты в корзине покупок.
+    Модель связывает Recipe и  User.
+    Attributes:
+        recipe(int):
+            Связаный рецепт. Связь через ForeignKey.
+        user(int):
+            Связаный пользователь. Связь через ForeignKey.
+    """
+    user = models.ForeignKey(
+        verbose_name='Пользователь',
+        related_name='carts',
+        to=User,
+        on_delete=CASCADE,
+    )
+    recipe = models.ForeignKey(
+        verbose_name='Рецепт',
+        related_name='carts',
+        to=Recipe,
+        on_delete=CASCADE,
+    )
+
+    class Meta:
+        verbose_name = 'Рецепт в списке покупок'
+        verbose_name_plural = 'Рецепты в списке покупок'
 
     def __str__(self) -> str:
         return f'{self.user} -> {self.recipe}'

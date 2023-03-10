@@ -30,19 +30,19 @@ ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', default='*')]
 DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-    "users.apps.UsersConfig",
-    "recipes.apps.RecipesConfig",
-    "api.apps.ApiConfig",
-    "rest_framework",
-    "rest_framework.authtoken",
-    "djoser",
-    "django_filters",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    'django_filters',
+    'api.apps.ApiConfig',
+    'recipes.apps.RecipesConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -93,7 +93,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
-#AUTH_USER_MODEL = "users.CustomUser"
+AUTH_USER_MODEL = 'users.CustomUser'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
