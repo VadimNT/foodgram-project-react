@@ -1,8 +1,9 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+from django.db.models import Q, F
 
-from core.enums import MAX_LEN_EMAIL_FIELD, MAX_LEN_USERS_CHARFIELD
+from core.enums import MAX_LEN_EMAIL_FIELD, MAX_LEN_USERS_PASSWORD
 
 
 class CustomUser(AbstractUser):
@@ -16,17 +17,19 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(
         'Имя',
-        max_length=MAX_LEN_USERS_CHARFIELD
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=MAX_LEN_USERS_CHARFIELD
     )
     username = models.CharField(
         'username',
-        max_length=MAX_LEN_USERS_CHARFIELD,
         unique=True,
         validators=(UnicodeUsernameValidator(),)
+    )
+    password = models.CharField(
+        'username',
+        unique=True,
+        max_length=MAX_LEN_USERS_PASSWORD
     )
 
     class Meta:
@@ -67,6 +70,10 @@ class Follow(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'author'],
                 name='unique_follow'
+            ),
+            models.CheckConstraint(
+                check=~Q(user=F('author')),
+                name='no_self_follow'
             )
         ]
 
