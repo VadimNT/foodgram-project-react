@@ -1,7 +1,7 @@
 # Максимальная длина email
 MAX_LEN_EMAIL_FIELD = 254
 # Максимальная длина поля password модели CustomUser
-MAX_LEN_USERS_PASSWORD = 150
+MAX_LEN_USERS_FIELD= 150
 # Минимальная длина юзернейма (User)
 MIN_LEN_USERNAME = 3
 # Максимальная длина строковых полей моделей в приложении "recipes"

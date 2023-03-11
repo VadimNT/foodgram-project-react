@@ -3,7 +3,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.db.models import Q, F
 
-from core.enums import MAX_LEN_EMAIL_FIELD, MAX_LEN_USERS_PASSWORD
+from core.enums import MAX_LEN_EMAIL_FIELD, MAX_LEN_USERS_FIELD
 
 
 class CustomUser(AbstractUser):
@@ -17,21 +17,24 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(
         'Имя',
+        max_length=MAX_LEN_USERS_FIELD,
         unique=True,
     )
     last_name = models.CharField(
         'Фамилия',
+        max_length=MAX_LEN_USERS_FIELD,
         unique=True,
     )
     username = models.CharField(
         'username',
         unique=True,
+        max_length=MAX_LEN_USERS_FIELD,
         validators=(UnicodeUsernameValidator(),)
     )
     password = models.CharField(
         'username',
         unique=True,
-        max_length=MAX_LEN_USERS_PASSWORD
+        max_length=MAX_LEN_USERS_FIELD
     )
 
     class Meta:
