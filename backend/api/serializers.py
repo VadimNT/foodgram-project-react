@@ -36,16 +36,17 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         """
         Првоеряем подписку на пользователя
-        :param obj: пользователь, который подписан
-        :return: вернет True or False, если подписан
+            :param obj: пользователь, который подписан
+            :return: вернет True or False, если подписан
         """
         user = self.context.get('request').user
-        if user.is_aninymous:
+        if user.is_anonymous:
             return False
         return Follow.objects.filter(user=user, author=obj).exists()
 
     def create(self, validated_data):
-        """ Создаёт нового пользователя с запрошенными полями.
+        """
+        Создаёт нового пользователя с запрошенными полями.
             Args:
                 validated_data (dict): Полученные проверенные данные.
             Returns:

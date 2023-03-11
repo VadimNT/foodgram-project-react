@@ -17,9 +17,11 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(
         'Имя',
+        unique=True,
     )
     last_name = models.CharField(
         'Фамилия',
+        unique=True,
     )
     username = models.CharField(
         'username',
