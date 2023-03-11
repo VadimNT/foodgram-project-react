@@ -13,9 +13,14 @@ Models:
         Также указывает количество ингридиента.
 """
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import SET_NULL, CASCADE
+
+from core.enums import (MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_CODE_COLOR,
+                        MAX_LEN_MEASUREMENT, MIN_COOKING_TIME,
+                        MAX_COOKING_TIME, MIN_AMOUNT_INGREDIENTS,
+                        MAX_AMOUNT_INGREDIENTS, )
 
 User = get_user_model()
 
@@ -35,17 +40,17 @@ class Tag(models.Model):
     """
     name = models.CharField(
         verbose_name='Название',
-        max_length=250,
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
         unique=True,
     )
     color = models.CharField(
         verbose_name='Цветовой HEX-код',
-        max_length=250,
+        max_length=MAX_LEN_CODE_COLOR,
         unique=True,
     )
     slug = models.SlugField(
         verbose_name='Слаг тэга',
-        max_length=250,
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
         unique=True
     )
 
@@ -71,11 +76,11 @@ class Ingredient(models.Model):
     """
     name = models.CharField(
         verbose_name='Название',
-        max_length=250
+        max_length=MAX_LEN_RECIPES_CHARFIELD
     )
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
-        max_length=250
+        max_length=MAX_LEN_MEASUREMENT
     )
 
     class Meta:
@@ -134,7 +139,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название',
-        max_length=250,
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
     )
     image = models.ImageField(
         verbose_name='Изображение',
@@ -142,11 +147,21 @@ class Recipe(models.Model):
     )
     text = models.TextField(
         verbose_name='Описание',
-        max_length=250,
+        max_length=MAX_LEN_RECIPES_CHARFIELD,
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         default=0,
+        validators=(
+            MinValueValidator(
+                MIN_COOKING_TIME,
+                'Ваше блюдо приготовлено!',
+            ),
+            MaxValueValidator(
+                MAX_COOKING_TIME,
+                'Ваше блюдо слишком долго готовится!',
+            ),
+        ),
     )
 
     class Meta:
@@ -182,9 +197,18 @@ class IngredientRecipe(models.Model):
         on_delete=CASCADE,
     )
     amount = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1)],
         verbose_name='Количество',
-        default=1,
+        default=0,
+        validators=(
+            MinValueValidator(
+                MIN_AMOUNT_INGREDIENTS,
+                'Добавьте ингриденты.',
+            ),
+            MaxValueValidator(
+                MAX_AMOUNT_INGREDIENTS,
+                'Очень много ингридиентов!',
+            ),
+        ),
     )
 
     class Meta:

@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
+from core.enums import MAX_LEN_EMAIL_FIELD, MAX_LEN_USERS_CHARFIELD
+
 
 class CustomUser(AbstractUser):
     USERNAME_FIELD = 'email'
@@ -9,20 +11,20 @@ class CustomUser(AbstractUser):
 
     email = models.EmailField(
         'Email',
-        max_length=200,
+        max_length=MAX_LEN_EMAIL_FIELD,
         unique=True,
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150
+        max_length=MAX_LEN_USERS_CHARFIELD
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150
+        max_length=MAX_LEN_USERS_CHARFIELD
     )
     username = models.CharField(
         'username',
-        max_length=254,
+        max_length=MAX_LEN_USERS_CHARFIELD,
         unique=True,
         validators=(UnicodeUsernameValidator(),)
     )
