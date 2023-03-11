@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator
 
-from recipes.models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe, Cart, Favorite
 from users.models import CustomUser, Follow
 
 
@@ -10,12 +10,14 @@ class UserSerializer(serializers.ModelSerializer):
     is_subscribed = SerializerMethodField()
 
     username = serializers.CharField(
+        regex=r'^[\w.@+-]',
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all())
         ],
         required=True,
     )
     email = serializers.EmailField(
+        required=True,
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all())
         ]
@@ -46,7 +48,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Создаёт нового пользователя с запрошенными полями.
+            Создаёт нового пользователя с запрошенными полями.
             Args:
                 validated_data (dict): Полученные проверенные данные.
             Returns:
@@ -62,10 +64,17 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                'Пользователь с таким именем уже существует!')
+        return value
+
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Recipe.
-    Определён укороченный набор полей для некоторых эндпоинтов.
+    """
+        Сериализатор для модели Recipe.
+        Определён укороченный набор полей для некоторых эндпоинтов.
     """
 
     class Meta:
@@ -75,7 +84,8 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(UserSerializer):
-    """Сериализатор вывода авторов на которых подписан текущий пользователь.
+    """
+        Сериализатор вывода авторов на которых подписан текущий пользователь.
     """
     recipes = ShortRecipeSerializer(many=True, read_only=True)
     recipes_count = SerializerMethodField()
@@ -95,11 +105,10 @@ class SubscribeSerializer(UserSerializer):
         read_only_fields = '__all__',
 
     def get_is_subscribed(*args):
-        """Проверка подписки пользователей.
-        Переопределённый метод родительского класса для уменьшения нагрузки,
-        так как в текущей реализации всегда вернёт `True`.
-        Returns:
-            bool: True
+        """
+            Всегда возвращаем True.
+            Returns:
+                bool: True
         """
         return True
 
@@ -112,6 +121,15 @@ class SubscribeSerializer(UserSerializer):
         """
         return obj.recipes.count()
 
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        recipes = obj.recipes.all()
+        if limit:
+            recipes = recipes[: int(limit)]
+        serializer = RecipeSerializer(recipes, many=True, read_only=True)
+        return serializer.data
+
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -121,7 +139,8 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для вывода ингридиентов.
+    """
+        Сериализатор для вывода ингридиентов.
     """
 
     class Meta:
@@ -210,9 +229,53 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
 
 
+class RecipeShortSerializer(serializers.ModelSerializer):
+    """ Сериализатор для избранных рецептов и покупок """
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class CartSerializer(serializers.ModelSerializer):
-    pass
+    """Сериализатор для списка покупок """
+
+    class Meta:
+        model = Cart
+        fields = ('user', 'recipe',)
+
+    def validate(self, data):
+        user = data['user']
+        if user.shopping_list.filter(recipe=data['recipe']).exists():
+            raise serializers.ValidationError(
+                'Рецепт уже добавлен в корзину'
+            )
+        return data
+
+    def to_representation(self, instance):
+        return RecipeShortSerializer(
+            instance.recipe,
+            context={'request': self.context.get('request')}
+        ).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    pass
+    """  Сериализатор избранных рецептов """
+
+    class Meta:
+        model = Favorite
+        fields = ('user', 'recipe',)
+
+    def validate(self, data):
+        user = data['user']
+        if user.favorites.filter(recipe=data['recipe']).exists():
+            raise serializers.ValidationError(
+                'Рецепт уже добавлен в избранное.'
+            )
+        return data
+
+    def to_representation(self, instance):
+        return RecipeShortSerializer(
+            instance.recipe,
+            context={'request': self.context.get('request')}
+        ).data
