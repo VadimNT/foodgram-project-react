@@ -20,7 +20,7 @@ from django.db.models import SET_NULL, CASCADE
 from core.enums import (MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_CODE_COLOR,
                         MAX_LEN_MEASUREMENT, MIN_COOKING_TIME,
                         MAX_COOKING_TIME, MIN_AMOUNT_INGREDIENTS,
-                        MAX_AMOUNT_INGREDIENTS, )
+                        MAX_AMOUNT_INGREDIENTS, MAX_LEN_RECIPES_TEXTFIELD, )
 
 User = get_user_model()
 
@@ -139,7 +139,7 @@ class Recipe(models.Model):
     )
     name = models.CharField(
         verbose_name='Название',
-        max_length=MAX_LEN_RECIPES_CHARFIELD,
+        max_length=MAX_LEN_RECIPES_TEXTFIELD,
     )
     image = models.ImageField(
         verbose_name='Изображение',
