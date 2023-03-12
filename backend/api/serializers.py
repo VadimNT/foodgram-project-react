@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework.validators import UniqueValidator
 
-from core.enums import MAX_LEN_USERS_FIELD
 from recipes.models import Tag, Ingredient, Recipe, Cart, Favorite
 from users.models import CustomUser, Follow
 
