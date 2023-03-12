@@ -15,7 +15,8 @@ from api.serializers import (TagSerializer, IngredientSerializer,
                              UserSerializer, SubscribeSerializer,
                              RecipeWriteSerializer, CartSerializer,
                              FavoriteSerializer, RecipeReadSerializer)
-from recipes.models import Tag, Ingredient, Recipe, Favorite, Cart
+from recipes.models import Tag, Ingredient, Recipe, Favorite, Cart, \
+    IngredientRecipe
 from users.models import CustomUser, Follow
 
 
@@ -72,8 +73,8 @@ class RecipeViewSet(ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
-        ingredients = Recipe.objects.filter(
-            recipe__shopping_list__user=request.user
+        ingredients = IngredientRecipe.objects.filter(
+            recipe__carts__user=request.user
         ).order_by('ingredient__name').values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))

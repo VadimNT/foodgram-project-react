@@ -218,12 +218,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             return False
         return recipe.carts.filter(user=request.user).exists()
 
-    def get_is_in_shopping_cart(self, recipe):
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return recipe.carts.filter(user=request.user).exists()
-
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
