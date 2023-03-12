@@ -4,14 +4,13 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import (IsAdminOrReadOnly,
-                             IsAuthorOrAdminOrReadOnly)
+                             IsAuthorOrAdminOrReadOnly, IsAuthenticated)
 from api.serializers import (TagSerializer, IngredientSerializer,
                              UserSerializer, SubscribeSerializer,
                              RecipeSerializer, CartSerializer,
@@ -36,7 +35,7 @@ class IngredientViewSet(ModelViewSet):
         Вывод ингридиентов.
     """
     serializer_class = IngredientSerializer
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
@@ -50,7 +49,7 @@ class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
     @staticmethod
@@ -78,7 +77,7 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated])
+        permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk):
         context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
@@ -103,7 +102,7 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated])
+        permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk):
         context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
@@ -138,25 +137,55 @@ class UserViewSet(ModelViewSet):
     pagination_class = CustomPagination
 
     @action(
+        detail=False,
+        permission_classes=(IsAuthenticated,),
+        methods=['GET'],
+        url_path='me',
+    )
+    def me(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
+    @action(
         detail=True,
         methods=['post', 'delete'],
         permission_classes=(IsAuthenticated,),
     )
-    def subscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(CustomUser, pk=id)
-
+    def subscribe(self, request, pk):
+        user = self.request.user
+        author = get_object_or_404(CustomUser, id=pk)
         if request.method == 'POST':
-            serializer = SubscribeSerializer(
-                author, data=request.data, context={'request': request}
+            if author == user:
+                return Response(
+                    {"errors": "Ошибка подписки"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            instance, created = Follow.objects.get_or_create(
+                user=user,
+                author=author
             )
-            serializer.is_valid(raise_exception=True)
-            Follow.objects.create(user=user, author=author)
+            if not created:
+                return Response(
+                    {"errors": "Ошибка подписки"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            serializer = self.get_serializer(instance.author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            get_object_or_404(Follow, user=user, author=author).delete()
+            instance = Follow.objects.filter(
+                user=self.request.user,
+                author=author
+            )
+            if not instance.exists():
+                return Response(
+                    {"errors": "Ошибка отписки"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     @action(
         detail=False,
