@@ -13,8 +13,8 @@ from api.permissions import (IsAdminOrReadOnly,
                              IsAuthorOrAdminOrReadOnly, IsAuthenticated)
 from api.serializers import (TagSerializer, IngredientSerializer,
                              UserSerializer, SubscribeSerializer,
-                             RecipeSerializer, CartSerializer,
-                             FavoriteSerializer)
+                             RecipeWriteSerializer, CartSerializer,
+                             FavoriteSerializer, RecipeReadSerializer)
 from recipes.models import Tag, Ingredient, Recipe, Favorite, Cart
 from users.models import CustomUser, Follow
 
@@ -46,11 +46,16 @@ class RecipeViewSet(ModelViewSet):
         Вьюсет для работы с рецептами.
     """
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+    serializer_class = RecipeWriteSerializer
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeReadSerializer
+        return RecipeWriteSerializer
 
     @staticmethod
     def send_message(ingredients):

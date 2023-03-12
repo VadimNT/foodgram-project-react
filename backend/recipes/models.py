@@ -122,7 +122,7 @@ class Recipe(models.Model):
     """
     tags = models.ManyToManyField(
         verbose_name='Тэг',
-        related_name='recipes',
+        related_name='tags',
         to=Tag
     )
     author = models.ForeignKey(
@@ -135,7 +135,7 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField(
         to=Ingredient,
         verbose_name='Ингридиенты',
-        related_name='recipes',
+        related_name='recipe_ingredients',
         through='recipes.IngredientRecipe',
     )
     name = models.CharField(
@@ -188,13 +188,13 @@ class IngredientRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         verbose_name='В каких рецептах',
-        related_name='ingredient',
+        related_name='ingredienttorecipe',
         on_delete=CASCADE,
     )
-    ingredients = models.ForeignKey(
+    ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Связанные ингредиенты',
-        related_name='recipe',
+        related_name='ingredienttorecipe',
         on_delete=CASCADE,
     )
     amount = models.PositiveSmallIntegerField(
@@ -218,6 +218,40 @@ class IngredientRecipe(models.Model):
 
     def __str__(self) -> str:
         return f'{self.amount} {self.ingredients}'
+
+
+class TagRecipe(models.Model):
+    """Модель связывает тэги с рецептами."""
+
+    tag = models.ForeignKey(
+        Tag,
+        verbose_name="Тэги",
+        on_delete=models.CASCADE,
+        related_name="tag_recipes",
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name="Рецепт",
+        on_delete=models.CASCADE,
+        related_name="tag_recipes",
+    )
+
+    class Meta:
+        verbose_name = "Тэг рецепта"
+        verbose_name_plural = "Тэги рецептов"
+        ordering = (
+            "recipe__name",
+            "tag__name",
+        )
+        constraints = (
+            models.UniqueConstraint(
+                fields=("tag", "recipe"),
+                name="unique_tag_recipe_pair",
+            ),
+        )
+
+    def __str__(self):
+        return f"{self.id}: {self.recipe.name}, {self.tag.name}"
 
 
 class Favorite(models.Model):
