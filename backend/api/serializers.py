@@ -4,8 +4,8 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework.validators import UniqueValidator
 
 from core.utils import set_ingredient_in_recipe
-from recipes.models import Tag, Ingredient, Recipe, Cart, Favorite, \
-    IngredientRecipe
+from recipes.models import (Tag, Ingredient, Recipe, Cart, Favorite,
+                            IngredientRecipe, )
 from users.models import CustomUser, Follow
 
 
