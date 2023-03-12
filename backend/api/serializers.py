@@ -87,14 +87,14 @@ class SubscribeSerializer(UserSerializer):
     """
         Сериализатор вывода авторов на которых подписан текущий пользователь.
     """
-    recipes = ShortRecipeSerializer(many=True, read_only=True)
+    recipes = ShortRecipeSerializer()
     recipes_count = SerializerMethodField()
 
     class Meta:
         model = CustomUser
         fields = (
-            'id',
             'email',
+            'id',
             'username',
             'first_name',
             'last_name',
@@ -102,7 +102,7 @@ class SubscribeSerializer(UserSerializer):
             'recipes',
             'recipes_count',
         )
-        read_only_fields = '__all__',
+        read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def get_is_subscribed(*args):
         """
@@ -135,7 +135,6 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = '__all__'
-        read_only_fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):

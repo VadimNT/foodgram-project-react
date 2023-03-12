@@ -4,14 +4,13 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import (IsAdminOrReadOnly,
-                             IsAuthorOrAdminOrReadOnly)
+                             IsAuthorOrAdminOrReadOnly, IsAuthenticated)
 from api.serializers import (TagSerializer, IngredientSerializer,
                              UserSerializer, SubscribeSerializer,
                              RecipeSerializer, CartSerializer,
@@ -27,7 +26,7 @@ class TagViewSet(ModelViewSet):
        остальным только разрешен просмотр
     """
     serializer_class = TagSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly, )
     queryset = Tag.objects.all()
 
 
@@ -36,7 +35,7 @@ class IngredientViewSet(ModelViewSet):
         Вывод ингридиентов.
     """
     serializer_class = IngredientSerializer
-    permission_classes = (IsAuthorOrAdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly, )
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
@@ -78,7 +77,7 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated])
+        permission_classes=(IsAuthenticated, ))
     def shopping_cart(self, request, pk):
         context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
@@ -103,7 +102,7 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated])
+        permission_classes=(IsAuthenticated, ))
     def favorite(self, request, pk):
         context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
@@ -142,14 +141,14 @@ class UserViewSet(ModelViewSet):
         methods=['post', 'delete'],
         permission_classes=(IsAuthenticated,),
     )
-    def subscribe(self, request, id):
+    def subscribe(self, request, pk):
         user = request.user
-        author = get_object_or_404(CustomUser, pk=id)
-
+        author = get_object_or_404(CustomUser, id=pk)
         if request.method == 'POST':
             serializer = SubscribeSerializer(
                 author, data=request.data, context={'request': request}
             )
+            print(serializer)
             serializer.is_valid(raise_exception=True)
             Follow.objects.create(user=user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -160,7 +159,7 @@ class UserViewSet(ModelViewSet):
 
     @action(
         detail=False,
-        permission_classes=(IsAuthenticated,)
+        permission_classes=(IsAuthenticated, )
     )
     def subscriptions(self, request):
         user = request.user
