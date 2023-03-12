@@ -10,7 +10,7 @@ router = DefaultRouter()
 router.register('users', UserViewSet, 'users')
 router.register('tags', TagViewSet, 'tags')
 router.register('recipes', RecipeViewSet, 'recipes')
-router.register('ingredients', IngredientViewSet, 'ingredients')
+router.register( 'ingredients', IngredientViewSet, 'ingredients')
 
 urlpatterns = [
     path('', include(router.urls)),
