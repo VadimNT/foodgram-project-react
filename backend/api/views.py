@@ -110,13 +110,16 @@ class RecipeViewSet(ModelViewSet):
         methods=('POST',),
         permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk):
-        context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
-        data = {
-            'user': request.user.id,
-            'recipe': recipe.id
-        }
-        serializer = FavoriteSerializer(data=data, context=context)
+        instance, created = Recipe.objects.get_or_create(
+            user=request.user, recipe=recipe
+        )
+        if not created:
+            return Response(
+                {"errors": "Ошибка подписки"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = FavoriteSerializer(recipe)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
