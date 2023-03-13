@@ -151,6 +151,21 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+DJOSER = {
+    "SERIALIZERS": {
+        "user_create": "api.serializers.UserSerializer",
+        "user": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
+    },
+
+    "PERMISSIONS": {
+        "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
+        "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
+    },
+
+    "HIDE_USERS": False,
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 

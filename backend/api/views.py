@@ -14,9 +14,10 @@ from api.permissions import (IsAdminOrReadOnly,
 from api.serializers import (TagSerializer, IngredientSerializer,
                              UserSerializer, SubscribeSerializer,
                              RecipeWriteSerializer, CartSerializer,
-                             FavoriteSerializer, RecipeReadSerializer)
-from recipes.models import Tag, Ingredient, Recipe, Favorite, Cart, \
-    IngredientRecipe
+                             RecipeReadSerializer, UserPasswordSerializer,
+                             RecipeShortSerializer, )
+from recipes.models import (Tag, Ingredient, Recipe, Favorite, Cart,
+                            IngredientRecipe, )
 from users.models import CustomUser, Follow
 
 
@@ -71,7 +72,11 @@ class RecipeViewSet(ModelViewSet):
         response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
         return response
 
-    @action(detail=False, methods=['GET'])
+    @action(
+        detail=False,
+        methods=['GET'],
+        permission_classes=(IsAuthenticated,),
+    )
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__carts__user=request.user
@@ -83,7 +88,8 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=(IsAuthenticated,))
+        permission_classes=(IsAuthenticated,)
+    )
     def shopping_cart(self, request, pk):
         context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
@@ -105,33 +111,32 @@ class RecipeViewSet(ModelViewSet):
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def set_status_favorite(self, request, target):
+        obj = get_object_or_404(Recipe, pk=self.kwargs[self.lookup_field])
+        if request.method == "POST":
+            instance, created = target.objects.get_or_create(
+                user=request.user, recipe=obj
+            )
+            if not created:
+                return Response(
+                    {"errors": "Ошибка подписки"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            serializer = RecipeShortSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == "DELETE":
+            target.objects.filter(user=request.user, recipe=obj).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
     @action(
         detail=True,
-        methods=('POST',),
-        permission_classes=(IsAuthenticated,))
-    def favorite(self, request, pk):
-        recipe = get_object_or_404(Recipe, id=pk)
-        instance, created = Recipe.objects.get_or_create(
-            user=request.user, recipe=recipe
-        )
-        if not created:
-            return Response(
-                {"errors": "Ошибка подписки"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer = FavoriteSerializer(recipe)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @favorite.mapping.delete
-    def destroy_favorite(self, request, pk):
-        get_object_or_404(
-            Favorite,
-            user=request.user,
-            recipe=get_object_or_404(Recipe, id=pk)
-        ).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        permission_classes=[IsAuthorOrAdminOrReadOnly],
+        methods=["POST", "DELETE"],
+    )
+    def favorite(self, request, *args, **kwargs):
+        """Добавление и удаление из избранных"""
+        return self.set_status_favorite(request, Favorite)
 
 
 class UserViewSet(ModelViewSet):
@@ -151,13 +156,36 @@ class UserViewSet(ModelViewSet):
         methods=['GET'],
         url_path='me',
     )
-    def me(self, request, *args, **kwargs):
+    def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
     @action(
+        detail=False,
+        methods=['POST'],
+        permission_classes=(IsAuthenticated,),
+    )
+    def set_password(self, request):
+        """Изменить пароль."""
+
+        serializer = UserPasswordSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {'message': 'Пароль изменен!'},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {'error': 'Введите верные данные!'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['POST', 'DELETE'],
         permission_classes=(IsAuthenticated,),
     )
     def subscribe(self, request, pk):

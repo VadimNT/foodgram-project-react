@@ -1,9 +1,13 @@
+import django.contrib.auth.password_validation as validators
+from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField, ReadOnlyField
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
+from core.texts import ERR_MSG
 from recipes.models import (Tag, Ingredient, Recipe, Cart, Favorite,
                             IngredientRecipe, TagRecipe, )
 from users.models import CustomUser, Follow
@@ -29,8 +33,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = (
-            'id',
             'email',
+            'id',
             'username',
             'first_name',
             'last_name',
@@ -73,6 +77,33 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
 
+class UserPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        label='Новый пароль')
+    current_password = serializers.CharField(
+        label='Текущий пароль')
+
+    def validate_current_password(self, current_password):
+        user = self.context['request'].user
+        if not authenticate(
+                username=user.email,
+                password=current_password):
+            raise serializers.ValidationError(
+                ERR_MSG, code='authorization')
+        return current_password
+
+    def validate_new_password(self, new_password):
+        validators.validate_password(new_password)
+        return new_password
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        password = make_password(validated_data.get('new_password'))
+        user.password = password
+        user.save()
+        return validated_data
+
+
 class SubscribeSerializer(UserSerializer):
     """
         Сериализатор вывода авторов на которых подписан текущий пользователь.
@@ -109,7 +140,7 @@ class SubscribeSerializer(UserSerializer):
         recipes = obj.recipes.all()
         if limit:
             recipes = recipes[: int(limit)]
-        serializer = RecipeReadSerializer(recipes, many=True, read_only=True)
+        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
         return serializer.data
 
 
@@ -346,28 +377,6 @@ class CartSerializer(serializers.ModelSerializer):
         if user.carts.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
                 'Рецепт уже добавлен в корзину'
-            )
-        return data
-
-    def to_representation(self, instance):
-        return RecipeShortSerializer(
-            instance.recipe,
-            context={'request': self.context.get('request')}
-        ).data
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    """  Сериализатор избранных рецептов """
-
-    class Meta:
-        model = Favorite
-        fields = ('user', 'recipe',)
-
-    def validate(self, data):
-        user = data['user']
-        if user.favorited.filter(recipe=data['recipe']).exists():
-            raise serializers.ValidationError(
-                'Рецепт уже добавлен в избранное.'
             )
         return data
 
