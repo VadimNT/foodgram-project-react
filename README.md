@@ -1,5 +1,5 @@
 ![foodgram-project-react Workflow Status](https://github.com/themasterid/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master&event=push)
-# Продуктовый помощник Foodgram - дипломный проект студента 21 когорты Яндекс.Практикум 2021-2022 гг. Клепикова Д.
+# Продуктовый помощник Foodgram
 
 После запуска проекта, он будет доступен по адресу http://127.0.0.1
 Как запустить и посмотреть в действии описано ниже.
@@ -263,4 +263,4 @@ GRANT ALL PRIVILEGES ON DATABASE basename TO username;
 http://127.0.0.1/api/docs/
 ```
 
-Автор: [Клепиков Дмитрий](https://github.com/themasterid)
+Автор: [Белоезров Вадим](https://github.com/VadimNT)
