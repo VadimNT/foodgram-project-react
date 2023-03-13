@@ -1,6 +1,5 @@
 version: '3.8'
 services:
-
   frontend:
     build:
       context: ../frontend
@@ -9,7 +8,7 @@ services:
       - ../frontend/:/app/result_build/
 
   db:
-    image: postgres:12.4-alpine
+    image: postgres:13.0-alpine
     ports:
       - "5432:5432"
     volumes:
@@ -18,7 +17,7 @@ services:
       - ./.env
 
   backend:
-    image: zhss1983/foodgram:latest
+    image: smilentag/foodgram:latest
     restart: always
     command: >
       sh -c "python manage.py collectstatic --noinput &&
