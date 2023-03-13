@@ -1,4 +1,4 @@
-version: '3.8-slim'
+version: '3.8'
 services:
 
   frontend:
@@ -31,9 +31,7 @@ services:
     depends_on:
       - db
     env_file:
-      - ./.env_db
-      - ./.env_mail
-      - ./.env_web
+      - ./.env
 
   nginx:
     image: nginx:1.21.4-alpine
@@ -45,7 +43,7 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
     depends_on:
       - backend
-      -
+
 volumes:
   postgres_data:
   static_value:

@@ -35,41 +35,23 @@ class IngredientAdmin(ModelAdmin):
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    list_display = (
-        'get_tags', 'get_author', 'name', 'image', 'text', 'cooking_time',
-        'get_ingredients', 'get_favorite_count', 'get_image',
-    )
-    list_filter = ('name', 'author__username', 'tags__name',)
-    search_fields = (
-        'tags', 'author', 'name', 'image', 'text', 'cooking_time',
-    )
+    list_display = ('author', 'name', 'cooking_time',
+                    'get_favorites', 'get_ingredients',)
+    search_fields = ('name', 'author', 'tags')
+    list_filter = ('author', 'name', 'tags')
     empty_value_display = EMPTY_MSG
 
-    @display(description='Электронная почта автора')
-    def get_author(self, obj):
-        return obj.author.email
+    def get_favorites(self, obj):
+        return obj.favorited.count()
 
-    @display(description='Картинка рецепта')
-    def get_image(self, obj):
-        return mark_safe(f'<img src={obj.image.url} width="80" hieght="30"')
+    get_favorites.short_description = 'Избранное'
 
-    @display(description='Тэги')
-    def get_tags(self, obj):
-        list_ = [_.name for _ in obj.tags.all()]
-        return ', '.join(list_)
-
-    @display(description=' Ингредиенты ')
     def get_ingredients(self, obj):
-        return '\n '.join([
-            f'{item["ingredient__name"]} - {item["amount"]}'
-            f' {item["ingredient__measurement_unit"]}.'
-            for item in obj.recipe.values(
-                'ingredient__name',
-                'amount', 'ingredient__measurement_unit')])
+        return ', '.join([
+            ingredients.name for ingredients
+            in obj.ingredients.all()])
 
-    @display(description='В избранном')
-    def get_favorite_count(self, obj):
-        return obj.favorite_recipe.count()
+    get_ingredients.short_description = 'Ингридиенты'
 
 
 @register(Cart)
