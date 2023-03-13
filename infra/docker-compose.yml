@@ -24,16 +24,16 @@ services:
              python manage.py migrate &&
              gunicorn foodgram.wsgi:application --bind 0.0.0.0:80"
     volumes:
-      - static_value:/code/static/
-      - media_value:/code/media/
-      - ./backend/:/code/
+      - static_value:/app/static/
+      - media_value:/app/media/
+      - ./backend/:/app/
     depends_on:
       - db
     env_file:
       - ./.env
 
   nginx:
-    image: nginx:1.21.4-alpine
+    image: nginx:1.21.3-alpine
     ports:
       - "80:80"
     volumes:
