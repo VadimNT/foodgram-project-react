@@ -10,14 +10,15 @@ from rest_framework.viewsets import ModelViewSet
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import (IsAdminOrReadOnly,
-                             IsAuthorOrAdminOrReadOnly, IsAuthenticated)
-from api.serializers import (TagSerializer, IngredientSerializer,
-                             UserSerializer, SubscribeSerializer,
-                             RecipeWriteSerializer, CartSerializer,
-                             RecipeReadSerializer, UserPasswordSerializer,
-                             RecipeShortSerializer, )
-from recipes.models import (Tag, Ingredient, Recipe, Favorite, Cart,
-                            IngredientRecipe, )
+                             IsAuthenticated,
+                             IsAuthorOrAdminOrReadOnly, )
+from api.serializers import (CartSerializer, IngredientSerializer,
+                             RecipeReadSerializer, RecipeShortSerializer,
+                             RecipeWriteSerializer, SubscribeSerializer,
+                             TagSerializer, UserPasswordSerializer,
+                             UserSerializer, )
+from recipes.models import (Cart, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag, )
 from users.models import CustomUser, Follow
 
 
@@ -124,7 +125,7 @@ class RecipeViewSet(ModelViewSet):
                 )
             serializer = RecipeShortSerializer(obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        elif request.method == "DELETE":
+        if request.method == "DELETE":
             target.objects.filter(user=request.user, recipe=obj).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_404_NOT_FOUND)

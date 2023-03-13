@@ -2,14 +2,14 @@ import django.contrib.auth.password_validation as validators
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField, ReadOnlyField
+from rest_framework.fields import ReadOnlyField, SerializerMethodField
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
 from core.texts import ERR_MSG
-from recipes.models import (Tag, Ingredient, Recipe, Cart, Favorite,
-                            IngredientRecipe, TagRecipe, )
+from recipes.models import (Cart, Ingredient, IngredientRecipe, Recipe, Tag,
+                            TagRecipe, )
 from users.models import CustomUser, Follow
 
 

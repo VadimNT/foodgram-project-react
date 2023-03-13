@@ -1,9 +1,7 @@
-from django.contrib.admin import site, ModelAdmin, register, display
+from django.contrib.admin import display, ModelAdmin, register, site
 from django.utils.html import format_html
-from django.utils.safestring import mark_safe
-
 from core.texts import EMPTY_MSG
-from recipes.models import Tag, Ingredient, Recipe, Favorite, Cart
+from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag
 
 site.site_header = 'Администрирование сайта Foodgram'
 

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-from django.db.models import Q, F
+from django.db.models import F, Q
 
 from core.enums import MAX_LEN_EMAIL_FIELD, MAX_LEN_USERS_FIELD
 

@@ -13,15 +13,21 @@ Models:
         Также указывает количество ингридиента.
 """
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import SET_NULL, CASCADE
+from django.db.models import CASCADE, SET_NULL
 
-from core.enums import (MAX_LEN_RECIPES_CHARFIELD, MAX_LEN_CODE_COLOR,
-                        MAX_LEN_MEASUREMENT, MIN_COOKING_TIME,
-                        MAX_COOKING_TIME, MIN_AMOUNT_INGREDIENTS,
-                        MAX_AMOUNT_INGREDIENTS, MAX_LEN_RECIPES_TEXTFIELD,
-                        MAX_LEN_RECIPES_NAMEFIELD, )
+from core.enums import (
+    MAX_AMOUNT_INGREDIENTS,
+    MAX_COOKING_TIME,
+    MAX_LEN_CODE_COLOR,
+    MAX_LEN_MEASUREMENT,
+    MAX_LEN_RECIPES_CHARFIELD,
+    MAX_LEN_RECIPES_NAMEFIELD,
+    MAX_LEN_RECIPES_TEXTFIELD,
+    MIN_AMOUNT_INGREDIENTS,
+    MIN_COOKING_TIME,
+)
 
 User = get_user_model()
 
@@ -36,8 +42,9 @@ class Tag(models.Model):
             color(str):
                 Цвет тэга в HEX-кодировке. По умолчанию - чёрный
             slug(str):
-                Те же правила, что и для атрибута `name`, но для корректной работы
-                с фронтэндом следует заполнять латинскими буквами.
+                Те же правила, что и для атрибута `name`, но для
+                корректной работы с фронтэндом следует заполнять латинскими
+                буквами.
     """
     name = models.CharField(
         verbose_name='Название',
@@ -107,8 +114,9 @@ class Recipe(models.Model):
         tags(int):
             Связь many-to-many с моделью Tag.
         ingredients(int):
-            Связь many-to-many с моделью Ingredient. Связь создаётся посредством модели
-            AmountIngredient с указанием количества ингридиента.
+            Связь many-to-many с моделью Ingredient. Связь создаётся
+            посредством модели AmountIngredient с указанием количества
+            ингридиента.
         in_carts(int):
             Связь many-to-many с моделью User.
             Создаётся при добавлении пользователем рецепта в `покупки`.

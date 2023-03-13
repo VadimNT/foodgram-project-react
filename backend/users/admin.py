@@ -1,6 +1,5 @@
 from django.contrib.admin import ModelAdmin, register, site
-
-from users.models import Follow, CustomUser
+from users.models import CustomUser, Follow
 
 site.site_header = 'Администрирование сайта Foodgram'
 
