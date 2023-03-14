@@ -1,4 +1,4 @@
-![foodgram-project-react Workflow Status](https://github.com/themasterid/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master&event=push)
+![foodgram-project-react Workflow Status](https://github.com/VadimNT/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master&event=push)
 # Продуктовый помощник Foodgram
 
 После запуска проекта, он будет доступен по адресу http://127.0.0.1
