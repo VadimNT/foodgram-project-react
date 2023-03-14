@@ -2,12 +2,11 @@ version: '3.8'
 services:
   db:
     image: postgres:13.0-alpine
-    ports:
-      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - .env
+      - ./.env
+    container_name: foodgram_db
 
   backend:
     image: smilentag/foodgram_backend:latest
@@ -15,18 +14,17 @@ services:
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
-      - ./backend/:/app/
+    command: >
+      bash -c "python manage.py migrate &&
+      python manage.py collectstatic --noinput"
     depends_on:
       - db
     env_file:
-      - .env
+      - ./.env
     container_name: foodgram_backend
 
   frontend:
     image: smilentag/foodgram_frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
     volumes:
       - ./frontend/:/app/result_build/
     depends_on:
