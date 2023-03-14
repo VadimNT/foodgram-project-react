@@ -1,13 +1,5 @@
 version: '3.8'
 services:
-  frontend:
-    image: smilentag/foodgram_frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: frontend/Dockerfile
-    volumes:
-      - ./frontend/:/app/result_build/
-
   db:
     image: postgres:13.0-alpine
     ports:
@@ -20,10 +12,10 @@ services:
   backend:
     image: smilentag/foodgram_backend:latest
     restart: always
-    command: >
+    command:
       sh -c "python manage.py collectstatic --noinput &&
-             python manage.py migrate &&
-             gunicorn foodgram.wsgi:application --bind 0.0.0.0:80"
+      python manage.py migrate &&
+      gunicorn foodgram.wsgi:application --bind 0.0.0.0:80"
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
@@ -32,6 +24,18 @@ services:
       - db
     env_file:
       - .env
+    container_name: foodgram_backend
+
+  frontend:
+    image: smilentag/foodgram_frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ./frontend/:/app/result_build/
+    depends_on:
+      - db
+    container_name: foodgram_frontend
 
   nginx:
     image: nginx:1.21.3-alpine
@@ -46,6 +50,7 @@ services:
     depends_on:
       - backend
       - frontend
+    container_name: foodgram_nginx
 
 volumes:
   postgres_data:
