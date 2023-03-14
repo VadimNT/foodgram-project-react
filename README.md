@@ -70,7 +70,7 @@ mkdir infra
 Предварительно из папки /backend и /frontend загрузим актуальные данные на DockerHub (на вашем ПК):
 
 ```bash
-docker login -u themasterid
+docker login -u your_username
 ```
 
 ```bash
@@ -78,11 +78,11 @@ cd backend
 ```
 
 ```bash
-docker build -t themasterid/foodgram_backend:latest .
+docker build -t your_username/foodgram_backend:latest .
 ```
 
 ```bash
-docker push themasterid/foodgram_backend:latest
+docker push your_username/foodgram_backend:latest
 ```
 
 ```bash
@@ -94,11 +94,11 @@ cd frontend
 ```
 
 ```bash
-docker build -t themasterid/foodgram_frontend:latest .
+docker build -t your_username/foodgram_frontend:latest .
 ```
 
 ```bash
-docker push themasterid/foodgram_frontend:latest
+docker push your_username/foodgram_frontend:latest
 ```
 
 Перенести файлы docker-compose.yml и default.conf на сервер, из папки infra в текущем репозитории (на вашем ПК).
