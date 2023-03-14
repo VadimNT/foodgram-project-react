@@ -10,21 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clone repository
-      uses: actions/checkout@v2
+      - name: Clone repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        pip install -r backend/requirements.txt --no-cache-dir
-    - name: Lint with flake8
-      run: flake8 . --exclude tests,**/migrations
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          pip install -r backend/requirements.txt --no-cache-dir
+      - name: Lint with flake8
+        run: flake8 . --exclude tests,**/migrations
 
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
@@ -43,11 +43,20 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push to Docker Hub
+      - name: Push backend to Docker Hub
         uses: docker/build-push-action@v2
         with:
+          context: backend/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+
+      - name: Push frontend to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: frontend/
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+
 
   deploy:
     name: Deploy
@@ -76,7 +85,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd app/
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
             sudo docker-compose stop
             sudo docker-compose rm web
             rm .env
