@@ -74,7 +74,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           overwrite: true
-          source: "./docker-compose.yaml, ./nginx"
+          source: "./infra/docker-compose.yaml, ./infra/nginx"
           target: "./app/"
 
       - name: executing remote ssh commands to deploy
