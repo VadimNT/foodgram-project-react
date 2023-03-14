@@ -70,7 +70,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           overwrite: true
-          source: "./infra/docker-compose.yaml, ./infra/nginx.conf"
+          source: "./docker-compose.yaml, ./nginx.conf"
           target: "./app/"
 
       - name: pull docker image
