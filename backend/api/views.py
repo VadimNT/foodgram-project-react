@@ -7,7 +7,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import (IsAdminOrReadOnly,
                              IsAuthenticated,
@@ -40,7 +39,6 @@ class IngredientViewSet(ModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (IsAdminOrReadOnly,)
     queryset = Ingredient.objects.all()
-    filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
 
 
@@ -53,7 +51,6 @@ class RecipeViewSet(ModelViewSet):
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
