@@ -3,7 +3,7 @@ services:
   frontend:
     image: smilentag/foodgram_frontend:latest
     build:
-      context: ../frontend
+      context: ./frontend
       dockerfile: frontend/Dockerfile
     volumes:
       - ./frontend/:/app/result_build/
