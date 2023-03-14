@@ -17,9 +17,6 @@ services:
       - media_value:/app/media/
     ports:
       - "8000:8000"
-    command: >
-      bash -c "python manage.py migrate &&
-      python manage.py collectstatic --noinput"
     depends_on:
       - db
     env_file:
