@@ -1,34 +1,16 @@
-import django.contrib.auth.password_validation as validators
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import make_password
+from djoser.serializers import UserSerializer, UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.fields import ReadOnlyField, SerializerMethodField
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.generics import get_object_or_404
-from rest_framework.validators import UniqueValidator
 
-from core.texts import ERR_MSG
 from recipes.models import (Cart, Ingredient, IngredientRecipe, Recipe, Tag,
                             TagRecipe, )
 from users.models import CustomUser, Follow
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(UserSerializer):
     is_subscribed = SerializerMethodField()
-
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]',
-        validators=[
-            UniqueValidator(queryset=CustomUser.objects.all())
-        ],
-        required=True,
-    )
-    email = serializers.EmailField(
-        required=True,
-        validators=[
-            UniqueValidator(queryset=CustomUser.objects.all())
-        ]
-    )
 
     class Meta:
         model = CustomUser
@@ -52,59 +34,18 @@ class UserSerializer(serializers.ModelSerializer):
             return False
         return Follow.objects.filter(user=user, author=obj).exists()
 
-    def create(self, validated_data):
-        """
-            Создаёт нового пользователя с запрошенными полями.
-            Args:
-                validated_data (dict): Полученные проверенные данные.
-            Returns:
-                User: Созданный пользователь.
-        """
-        user = CustomUser(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
 
-    def validate_username(self, value):
-        if CustomUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError(
-                'Пользователь с таким именем уже существует!')
-        return value
+class CustomUserCreateSerializer(UserCreateSerializer):
+    """ Сериализатор создания пользователя """
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'email', 'username', 'first_name',
+            'last_name', 'password')
 
 
-class UserPasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField(
-        label='Новый пароль')
-    current_password = serializers.CharField(
-        label='Текущий пароль')
-
-    def validate_current_password(self, current_password):
-        user = self.context['request'].user
-        if not authenticate(
-                username=user.email,
-                password=current_password):
-            raise serializers.ValidationError(
-                ERR_MSG, code='authorization')
-        return current_password
-
-    def validate_new_password(self, new_password):
-        validators.validate_password(new_password)
-        return new_password
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        password = make_password(validated_data.get('new_password'))
-        user.password = password
-        user.save()
-        return validated_data
-
-
-class SubscribeSerializer(UserSerializer):
+class SubscribeSerializer(CustomUserSerializer):
     """
         Сериализатор вывода авторов на которых подписан текущий пользователь.
     """
@@ -194,7 +135,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """ Сериализатор просмотра рецепта """
     tags = TagSerializer(read_only=False, many=True)
-    author = UserSerializer(read_only=True, )
+    author = CustomUserSerializer(read_only=True, )
     ingredients = IngredientRecipeSerializer(
         many=True,
         source='ingredienttorecipe'
@@ -255,7 +196,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         many=True,
         queryset=Tag.objects.all()
     )
-    author = UserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True)
     ingredients = IngredientRecipeSerializer(many=True, )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()

@@ -2,20 +2,22 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
+from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import (IsAdminOrReadOnly,
                              IsAuthenticated,
-                             IsAuthorOrAdminOrReadOnly, )
+                             IsAuthorOrAdminOrReadOnly,
+                             IsAuthenticatedOrReadOnly, )
 from api.serializers import (CartSerializer, IngredientSerializer,
                              RecipeReadSerializer, RecipeShortSerializer,
                              RecipeWriteSerializer, SubscribeSerializer,
-                             TagSerializer, UserPasswordSerializer,
-                             UserSerializer, )
+                             TagSerializer, CustomUserSerializer, )
 from recipes.models import (Cart, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag, )
 from users.models import CustomUser, Follow
@@ -37,8 +39,9 @@ class IngredientViewSet(ModelViewSet):
         Вывод ингридиентов.
     """
     serializer_class = IngredientSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Ingredient.objects.all()
+    filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
 
 
@@ -47,10 +50,10 @@ class RecipeViewSet(ModelViewSet):
         Вьюсет для работы с рецептами.
     """
     queryset = Recipe.objects.all()
-    serializer_class = RecipeWriteSerializer
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -137,14 +140,14 @@ class RecipeViewSet(ModelViewSet):
         return self.set_status_favorite(request, Favorite)
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(UserViewSet):
     """Работает с пользователями.
        ViewSet для работы с пользователми - вывод таковых,
        регистрация.
        Для авторизованных пользователей —
        возможность подписаться на автора рецепта.
     """
-    serializer_class = UserSerializer
+    serializer_class = CustomUserSerializer
     queryset = CustomUser.objects.all()
     pagination_class = CustomPagination
 
@@ -157,29 +160,6 @@ class UserViewSet(ModelViewSet):
     def me(self, request):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
-
-    @action(
-        detail=False,
-        methods=['POST'],
-        permission_classes=(IsAuthenticated,),
-    )
-    def set_password(self, request):
-        """Изменить пароль."""
-
-        serializer = UserPasswordSerializer(
-            data=request.data,
-            context={'request': request}
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                {'message': 'Пароль изменен!'},
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            {'error': 'Введите верные данные!'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
     @action(
         detail=True,

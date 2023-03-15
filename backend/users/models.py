@@ -18,12 +18,10 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(
         'Имя',
         max_length=MAX_LEN_USERS_FIELD,
-        unique=True,
     )
     last_name = models.CharField(
         'Фамилия',
         max_length=MAX_LEN_USERS_FIELD,
-        unique=True,
     )
     username = models.CharField(
         'username',
@@ -32,8 +30,7 @@ class CustomUser(AbstractUser):
         validators=(UnicodeUsernameValidator(),)
     )
     password = models.CharField(
-        'username',
-        unique=True,
+        'password',
         max_length=MAX_LEN_USERS_FIELD
     )
 
