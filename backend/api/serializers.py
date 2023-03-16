@@ -1,6 +1,6 @@
-from djoser.serializers import UserSerializer, UserCreateSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
-from rest_framework.fields import ReadOnlyField, SerializerMethodField
+from rest_framework.fields import SerializerMethodField
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework.generics import get_object_or_404
 
@@ -45,46 +45,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             'last_name', 'password')
 
 
-class SubscribeSerializer(CustomUserSerializer):
-    """
-        Сериализатор вывода авторов на которых подписан текущий пользователь.
-    """
-    recipes = SerializerMethodField()
-    recipes_count = SerializerMethodField()
-
-    class Meta:
-        model = CustomUser
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count',
-        )
-        read_only_fields = ('email', 'username', 'first_name', 'last_name')
-
-    def get_recipes_count(self, obj):
-        """ Показывает общее количество рецептов у каждого автора.
-        Args:
-            obj (User): Запрошенный пользователь.
-        Returns:
-            int: Количество рецептов созданных запрошенным пользователем.
-        """
-        return obj.recipes.count()
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        recipes = obj.recipes.all()
-        if limit:
-            recipes = recipes[: int(limit)]
-        serializer = RecipeShortSerializer(recipes, many=True, read_only=True)
-        return serializer.data
-
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -92,14 +52,14 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class TagRecipeSerializer(serializers.ModelSerializer):
-    id = ReadOnlyField(source="tag.id")
-    name = ReadOnlyField(source="tag.name")
-    color = ReadOnlyField(source="tag.color")
-    slug = ReadOnlyField(source="tag.slug")
+    """
+    Сериализтор для вывода тэгов в рецепте согласно Redoc.
+    """
 
     class Meta:
         model = TagRecipe
         fields = ("id", "name", "color", "slug")
+        read_only_fields = ("id", "name", "color", "slug",)
 
     def to_internal_value(self, data):
         if isinstance(data, int):
@@ -304,6 +264,37 @@ class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscribeSerializer(CustomUserSerializer):
+    """
+        Сериализатор вывода авторов на которых подписан текущий пользователь.
+    """
+    recipes = RecipeShortSerializer(many=True, read_only=True)
+    recipes_count = SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+        )
+        read_only_fields = ('email', 'username', 'first_name', 'last_name')
+
+    def get_recipes_count(self, obj):
+        """ Показывает общее количество рецептов у каждого автора.
+        Args:
+            obj (User): Запрошенный пользователь.
+        Returns:
+            int: Количество рецептов созданных запрошенным пользователем.
+        """
+        return obj.recipes.count()
 
 
 class CartSerializer(serializers.ModelSerializer):

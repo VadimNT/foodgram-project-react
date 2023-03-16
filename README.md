@@ -262,5 +262,5 @@ GRANT ALL PRIVILEGES ON DATABASE basename TO username;
 ```url
 http://127.0.0.1/api/docs/
 ```
-
+Проект в сети "Интернет" доступен по адресу: http://158.160.44.20
 Автор: [Белоезров Вадим](https://github.com/VadimNT)

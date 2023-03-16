@@ -13,11 +13,12 @@ Models:
         Также указывает количество ингридиента.
 """
 from django.contrib.auth import get_user_model
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator, )
 from django.db import models
-from django.db.models import CASCADE, SET_NULL
+from django.db.models import CASCADE, SET_NULL, UniqueConstraint
 
-from core.enums import (
+from foodgram.settings import (
     MAX_AMOUNT_INGREDIENTS,
     MAX_COOKING_TIME,
     MAX_LEN_CODE_COLOR,
@@ -55,6 +56,12 @@ class Tag(models.Model):
         verbose_name='Цветовой HEX-код',
         max_length=MAX_LEN_CODE_COLOR,
         unique=True,
+        validators=[
+            RegexValidator(
+                regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+                message='Проверьте HEX формат',
+            )
+        ],
     )
     slug = models.SlugField(
         verbose_name='Слаг тэга',
@@ -294,6 +301,12 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт пользователя',
         verbose_name_plural = 'Избранные рецепты пользователя'
+        constraints = [
+            UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='%(app_label)s_%(class)s_unique'
+            )
+        ]
 
     def __str__(self) -> str:
         return f'{self.user} -> {self.recipe}'
@@ -325,6 +338,12 @@ class Cart(models.Model):
         verbose_name = 'Рецепт в списке покупок'
         verbose_name_plural = 'Рецепты в списке покупок'
         ordering = ('-id',)
+        constraints = [
+            UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='%(app_label)s_%(class)s_unique'
+            )
+        ]
 
     def __str__(self) -> str:
         return f'{self.user} -> {self.recipe}'

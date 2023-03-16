@@ -5,25 +5,26 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly, )
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from api.filters import IngredientFilter, RecipeFilter
+from api.mixins import SubscribeStatusViewSetMixin
 from api.pagination import CustomPagination
 from api.permissions import (IsAdminOrReadOnly,
-                             IsAuthenticated,
-                             IsAuthorOrAdminOrReadOnly,
-                             IsAuthenticatedOrReadOnly, )
+                             IsAuthorOrAdminOrReadOnly, )
 from api.serializers import (CartSerializer, IngredientSerializer,
                              RecipeReadSerializer, RecipeShortSerializer,
                              RecipeWriteSerializer, SubscribeSerializer,
-                             TagSerializer, CustomUserSerializer, )
+                             TagSerializer, CustomUserSerializer,
+                             CustomUserCreateSerializer, )
 from recipes.models import (Cart, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag, )
 from users.models import CustomUser, Follow
 
 
-# Create your views here.
 class TagViewSet(ModelViewSet):
     """Работает с тэгами.
        Изменение и создание тэгов разрешено только админам,
@@ -45,7 +46,7 @@ class IngredientViewSet(ModelViewSet):
     search_fields = ('^name',)
 
 
-class RecipeViewSet(ModelViewSet):
+class RecipeViewSet(ModelViewSet, SubscribeStatusViewSetMixin):
     """
         Вьюсет для работы с рецептами.
     """
@@ -60,7 +61,6 @@ class RecipeViewSet(ModelViewSet):
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
-    @staticmethod
     def send_message(ingredients):
         shopping_list = 'Купить в магазине:'
         for ingredient in ingredients:
@@ -75,7 +75,7 @@ class RecipeViewSet(ModelViewSet):
 
     @action(
         detail=False,
-        methods=['GET'],
+        methods=('GET',),
         permission_classes=(IsAuthenticated,),
     )
     def download_shopping_cart(self, request):
@@ -112,24 +112,6 @@ class RecipeViewSet(ModelViewSet):
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def set_status_favorite(self, request, target):
-        obj = get_object_or_404(Recipe, pk=self.kwargs[self.lookup_field])
-        if request.method == "POST":
-            instance, created = target.objects.get_or_create(
-                user=request.user, recipe=obj
-            )
-            if not created:
-                return Response(
-                    {"errors": "Ошибка подписки"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            serializer = RecipeShortSerializer(obj)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE":
-            target.objects.filter(user=request.user, recipe=obj).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
     @action(
         detail=True,
         permission_classes=[IsAuthorOrAdminOrReadOnly],
@@ -137,10 +119,15 @@ class RecipeViewSet(ModelViewSet):
     )
     def favorite(self, request, *args, **kwargs):
         """Добавление и удаление из избранных"""
-        return self.set_status_favorite(request, Favorite)
+        return self._set_status_favorite(
+            request,
+            Recipe,
+            Favorite,
+            RecipeShortSerializer
+        )
 
 
-class UserViewSet(UserViewSet):
+class UserViewSet(UserViewSet, SubscribeStatusViewSetMixin):
     """Работает с пользователями.
        ViewSet для работы с пользователми - вывод таковых,
        регистрация.
@@ -158,7 +145,7 @@ class UserViewSet(UserViewSet):
         url_path='me',
     )
     def me(self, request):
-        serializer = self.get_serializer(request.user)
+        serializer = CustomUserSerializer(request.user)
         return Response(serializer.data)
 
     @action(
@@ -167,40 +154,12 @@ class UserViewSet(UserViewSet):
         permission_classes=(IsAuthenticated,),
     )
     def subscribe(self, request, pk):
-        user = self.request.user
-        author = get_object_or_404(CustomUser, id=pk)
-        if request.method == 'POST':
-            if author == user:
-                return Response(
-                    {"errors": "Ошибка подписки"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            instance, created = Follow.objects.get_or_create(
-                user=user,
-                author=author
-            )
-            if not created:
-                return Response(
-                    {"errors": "Ошибка подписки"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            serializer = self.get_serializer(instance.author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            instance = Follow.objects.filter(
-                user=self.request.user,
-                author=author
-            )
-            if not instance.exists():
-                return Response(
-                    {"errors": "Ошибка отписки"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return self._set_status_favorite(
+            request,
+            CustomUser,
+            Follow,
+            CustomUserCreateSerializer
+        )
 
     @action(
         detail=False,

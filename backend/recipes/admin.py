@@ -1,7 +1,9 @@
-from django.contrib.admin import display, ModelAdmin, register, site
+from django.contrib.admin import (display, ModelAdmin, register, site,
+                                  TabularInline, )
 from django.utils.html import format_html
-from core.texts import EMPTY_MSG
-from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag
+from foodgram.settings import EMPTY_MSG
+from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag, \
+    IngredientRecipe
 
 site.site_header = 'Администрирование сайта Foodgram'
 
@@ -31,12 +33,19 @@ class IngredientAdmin(ModelAdmin):
     empty_value_display = EMPTY_MSG
 
 
+class IngredientInline(TabularInline):
+    model = IngredientRecipe
+    extra = 3
+    min_num = 1
+
+
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
     list_display = ('author', 'name', 'cooking_time',
                     'get_favorites', 'get_ingredients',)
     search_fields = ('name', 'author', 'tags')
     list_filter = ('author', 'name', 'tags')
+    inlines = (IngredientInline,)
     empty_value_display = EMPTY_MSG
 
     def get_favorites(self, obj):
