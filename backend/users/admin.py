@@ -5,7 +5,7 @@ site.site_header = 'Администрирование сайта Foodgram'
 
 
 @register(CustomUser)
-class UserAdmin(ModelAdmin):
+class CustomUserAdmin(ModelAdmin):
     list_display = ('username', 'email',)
     list_filter = ('username', 'email',)
     search_fields = ('username', 'email',)

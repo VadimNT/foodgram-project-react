@@ -29,10 +29,10 @@ class CustomUserSerializer(UserSerializer):
             :param obj: пользователь, который подписан
             :return: вернет True or False, если подписан
         """
-        user = self.context['request'].user
-        if user.is_anonymous:
+        request = self.context.get('request')
+        if self.context.get('request').user.is_anonymous:
             return False
-        return Follow.objects.filter(user=user, author=obj).exists()
+        return obj.following.filter(user=request.user).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):

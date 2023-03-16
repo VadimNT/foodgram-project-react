@@ -127,7 +127,7 @@ class RecipeViewSet(ModelViewSet, SubscribeStatusViewSetMixin):
         )
 
 
-class UserViewSet(UserViewSet, SubscribeStatusViewSetMixin):
+class CustomUserViewSet(UserViewSet, SubscribeStatusViewSetMixin):
     """Работает с пользователями.
        ViewSet для работы с пользователми - вывод таковых,
        регистрация.
@@ -139,21 +139,11 @@ class UserViewSet(UserViewSet, SubscribeStatusViewSetMixin):
     pagination_class = CustomPagination
 
     @action(
-        detail=False,
-        permission_classes=(IsAuthenticated,),
-        methods=['GET'],
-        url_path='me',
-    )
-    def me(self, request):
-        serializer = CustomUserSerializer(request.user)
-        return Response(serializer.data)
-
-    @action(
         detail=True,
         methods=['POST', 'DELETE'],
         permission_classes=(IsAuthenticated,),
     )
-    def subscribe(self, request, pk):
+    def subscribe(self, request, id):
         return self._set_status_favorite(
             request,
             CustomUser,
