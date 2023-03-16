@@ -159,7 +159,7 @@ class UserViewSet(UserViewSet, SubscribeStatusViewSetMixin):
             request,
             CustomUser,
             Follow,
-            CustomUserCreateSerializer
+            SubscribeSerializer
         )
 
     @action(
