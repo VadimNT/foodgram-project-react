@@ -9,7 +9,7 @@ class SubscribeStatusViewSetMixin:
             request,
             target_model,
             target_subscribe,
-            TypeSerializer
+            type_serializer
     ):
         obj = get_object_or_404(
             target_model,
@@ -24,7 +24,7 @@ class SubscribeStatusViewSetMixin:
                     {"errors": "Ошибка подписки"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = TypeSerializer(obj)
+            serializer = type_serializer(obj)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
             target_subscribe.objects.filter(
