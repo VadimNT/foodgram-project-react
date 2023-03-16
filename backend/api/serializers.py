@@ -6,7 +6,7 @@ from rest_framework.generics import get_object_or_404
 
 from recipes.models import (Cart, Ingredient, IngredientRecipe, Recipe, Tag,
                             TagRecipe, )
-from users.models import CustomUser, Follow
+from users.models import CustomUser
 
 
 class CustomUserSerializer(UserSerializer):
