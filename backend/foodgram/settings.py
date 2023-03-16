@@ -89,7 +89,8 @@ if DEBUG:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+            'ENGINE': os.getenv('DB_ENGINE',
+                                default='django.db.backends.postgresql'),
             'NAME': os.getenv('DB_NAME', default='postgres'),
             'USER': os.getenv('POSTGRES_USER', default='postgres'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
@@ -203,4 +204,3 @@ MAX_LEN_CODE_COLOR = 7
 EMPTY_MSG = '-пусто-'
 # выдаем ошибку при авторизации.
 ERR_MSG = 'Не удается войти в систему с учетными данными.'
-

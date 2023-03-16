@@ -2,8 +2,8 @@ from django.contrib.admin import (display, ModelAdmin, register, site,
                                   TabularInline, )
 from django.utils.html import format_html
 from foodgram.settings import EMPTY_MSG
-from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag, \
-    IngredientRecipe
+from recipes.models import (Cart, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag, )
 
 site.site_header = 'Администрирование сайта Foodgram'
 

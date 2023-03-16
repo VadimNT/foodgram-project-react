@@ -33,7 +33,7 @@ class RecipeFilter(FilterSet):
                 and self.request.query_params.get("is_favorited")
         ):
             return queryset.filter(favorited__user=self.request.user)
-        elif (
+        if (
                 value
                 and self.request.query_params.get("is_in_shopping_cart")
         ):
