@@ -18,8 +18,7 @@ from api.permissions import (IsAdminOrReadOnly,
 from api.serializers import (CartSerializer, IngredientSerializer,
                              RecipeReadSerializer, RecipeShortSerializer,
                              RecipeWriteSerializer, SubscribeSerializer,
-                             TagSerializer, CustomUserSerializer,
-                             CustomUserCreateSerializer, )
+                             TagSerializer, CustomUserSerializer, )
 from recipes.models import (Cart, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag, )
 from users.models import CustomUser, Follow
