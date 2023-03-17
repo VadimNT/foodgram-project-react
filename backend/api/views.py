@@ -60,8 +60,7 @@ class RecipeViewSet(ModelViewSet, SubscribeStatusViewSetMixin):
             return RecipeReadSerializer
         return RecipeWriteSerializer
 
-    @staticmethod
-    def send_message(ingredients):
+    def send_message(self, ingredients):
         shopping_list = 'Купить в магазине:'
         for ingredient in ingredients:
             shopping_list += (
