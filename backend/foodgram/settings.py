@@ -197,7 +197,7 @@ MAX_COOKING_TIME = 300
 # Минимальное количество ингридиентов для рецепта
 MIN_AMOUNT_INGREDIENTS = 1
 # Максимальное количество ингридиентов для рецепта
-MAX_AMOUNT_INGREDIENTS = 32
+MAX_AMOUNT_INGREDIENTS = 5000
 # Длина кода цвета
 MAX_LEN_CODE_COLOR = 7
 # выводим пустое сообщение

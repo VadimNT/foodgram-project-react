@@ -22,18 +22,19 @@ class SubscribeStatusViewSetMixin:
                 instance, created = target_subscribe.objects.get_or_create(
                     user=request.user, recipe=obj
                 )
+                serializer = type_serializer(obj)
             else:
                 instance, created = target_subscribe.objects.get_or_create(
                     user=request.user, author=obj
                 )
+                serializer = type_serializer(obj, data=request.data,
+                                             context={'request': request})
+                serializer.is_valid(raise_exception=True)
             if not created:
                 return Response(
                     {"errors": "Ошибка подписки"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            serializer = type_serializer(obj, data=request.data,
-                                         context={'request': request})
-            serializer.is_valid(raise_exception=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == "DELETE":
             if target_subscribe == Favorite:

@@ -113,7 +113,7 @@ class RecipeViewSet(ModelViewSet, SubscribeStatusViewSetMixin):
 
     @action(
         detail=True,
-        permission_classes=[IsAuthorOrAdminOrReadOnly],
+        permission_classes=(IsAuthorOrAdminOrReadOnly, ),
         methods=["POST", "DELETE"],
     )
     def favorite(self, request, *args, **kwargs):

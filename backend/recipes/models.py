@@ -283,7 +283,6 @@ class Favorite(models.Model):
             Связаный рецепт. Связь через ForeignKey.
         user(int):
             Связаный пользователь. Связь через ForeignKey.
-        date_added(datetime):
     """
     recipe = models.ForeignKey(
         verbose_name='Рецепт',
